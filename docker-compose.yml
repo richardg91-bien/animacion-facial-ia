@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  wav2lip:
+    build: .
+    volumes:
+      - ./resultados:/app/resultados
+      - ./input:/app/input
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: python wav2lip_cli.py --test
+
+  wav2lip-custom:
+    build: .
+    volumes:
+      - ./resultados:/app/resultados
+      - ./input:/app/input
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: python wav2lip_cli.py --imagen input/imagen.jpg --texto "Tu texto aquí"
