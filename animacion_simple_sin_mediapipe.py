@@ -201,20 +201,22 @@ class AppSimple:
             cartoon_path = os.path.join(out_dir, f"{nombre_salida}_cartoon.jpg")
             cv2.imwrite(cartoon_path, cartoon)
 
-        self.status.config(text="👁️ Detectando cara...", fg="orange")
-        
-        # Detectar cara y labios
-        puntos, coords_cara = detectar_cara_simple(cartoon)
-        if puntos is None:
-            self.status.config(text="❌ No se detectó cara en la imagen. Prueba otra imagen.", fg="red")
-            return
+            self.status.config(text="👁️ Detectando cara...", fg="orange")
+            
+            # Detectar cara y labios
+            puntos, coords_cara = detectar_cara_simple(cartoon)
+            if puntos is None:
+                self.status.config(text="❌ No se detectó cara en la imagen. Prueba otra imagen.", fg="red")
+                return
 
-        # Mostrar información de la cara detectada
-        if coords_cara:
-            x, y, w, h = coords_cara
-            print(f"✅ Cara detectada: {w}x{h} píxeles en posición ({x}, {y})")
+            # Mostrar información de la cara detectada
+            if coords_cara:
+                x, y, w, h = coords_cara
+                print(f"✅ Cara detectada: {w}x{h} píxeles en posición ({x}, {y})")
 
-        self.status.config(text="🎤 Generando audio...", fg="orange")            # Generar audio
+            self.status.config(text="🎤 Generando audio...", fg="orange")
+            
+            # Generar audio
             audio_path = os.path.join(out_dir, f"{nombre_salida}.wav")
             generar_voz(texto, audio_path)
 
