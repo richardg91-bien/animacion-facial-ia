@@ -14,6 +14,17 @@ import mediapipe as mp
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
+# --- Intento de importación dinámica de Wav2Lip Mejorado ---
+wav2lip_mejorado_disponible = False
+try:
+    # Añadir extras al path para permitir la importación directa
+    sys.path.append(os.path.join(os.path.dirname(__file__), 'extras'))
+    from wav2lip_mejorado import lip_sync
+    wav2lip_mejorado_disponible = True
+    print("INFO: Usando implementación de wav2lip_mejorado.py")
+except ImportError as e:
+    print(f"ADVERTENCIA: wav2lip_mejorado.py no encontrado o con errores. Usando fallback. Error: {e}")
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 EXTRAS_DIR = os.path.join(BASE_DIR, "extras")
 RESULTS_DIR = os.path.join(BASE_DIR, "resultados")
@@ -101,24 +112,6 @@ def animar_labios_blend(imagen, puntos_labios, salida_avi, fps=25, frames_count=
     out.release()
     return salida_avi
 
-def try_import_wav2lip():
-    """
-    Intenta importar la clase Wav2LipMejorado desde extras/wav2lip_mejorado.py
-    y devuelve una instancia si es posible.
-    """
-    try:
-        sys.path.insert(0, EXTRAS_DIR)
-        import wav2lip_mejorado as w2l
-        if hasattr(w2l, "Wav2LipMejorado"):
-            inst = w2l.Wav2LipMejorado()
-            return inst
-    except Exception as e:
-        print("No se pudo importar wav2lip_mejorado:", e)
-    finally:
-        if EXTRAS_DIR in sys.path:
-            sys.path.remove(EXTRAS_DIR)
-    return None
-
 def combinar_audio_video_ffmpeg(video_path, audio_path, salida_final):
     ffmpeg = shutil.which("ffmpeg") or "ffmpeg"
     if shutil.which("ffmpeg") is None:
@@ -140,31 +133,29 @@ def procesar_imagen_pipeline(imagen_path, texto, nombre_salida, voice_rate=150, 
     img = cv2.imread(imagen_path)
     if img is None:
         return False, "No se pudo leer la imagen"
+    
+    audio_path = os.path.join(RESULTS_DIR, f"{nombre_salida}.mp3")
+    generar_voz(texto, audio_path, rate=voice_rate, voice_index=voice_idx)
+    
+    # Intentar usar la versión mejorada de Wav2Lip si está disponible
+    if use_wav2lip and wav2lip_mejorado_disponible:
+        final_output = os.path.join(RESULTS_DIR, f"{nombre_salida}_final.mp4")
+        try:
+            lip_sync(imagen_path, audio_path, final_output)
+            return True, final_output
+        except Exception as e:
+            print(f"Error con wav2lip_mejorado: {e}, usando fallback.")
+
+    # Fallback: animación interna
     cartoon = cartoonify_image(img)
     cartoon_path = os.path.join(RESULTS_DIR, f"{nombre_salida}_cartoon.jpg")
     cv2.imwrite(cartoon_path, cartoon)
     puntos = detectar_labios_mediapipe(cartoon)
-    audio_path = os.path.join(RESULTS_DIR, f"{nombre_salida}.mp3")
-    generar_voz(texto, audio_path, rate=voice_rate, voice_index=voice_idx)
-    final_output = os.path.join(RESULTS_DIR, f"{nombre_salida}_final.mp4")
-    wav2lip_inst = None
-    if use_wav2lip:
-        wav2lip_inst = try_import_wav2lip()
-    if wav2lip_inst is not None:
-        try:
-            print("Usando Wav2LipMejorado...")
-            success = wav2lip_inst.create_video_from_image_advanced(imagen_path, audio_path, final_output)
-            if success:
-                return True, final_output
-            else:
-                print("Wav2Lip no produjo resultado, fallback al método interno.")
-        except Exception as e:
-            print("Error usando Wav2LipMejorado:", e)
-    # Fallback: animación interna
     if puntos is None:
         return False, "No se detectaron labios en la imagen"
     avi_path = os.path.join(RESULTS_DIR, f"{nombre_salida}.avi")
     animar_labios_blend(cartoon, puntos, avi_path)
+    final_output = os.path.join(RESULTS_DIR, f"{nombre_salida}_final.mp4")
     ok, msg = combinar_audio_video_ffmpeg(avi_path, audio_path, final_output)
     if ok:
         return True, final_output
