@@ -17,4 +17,4 @@ services:
       - ./input:/app/input
     environment:
       - PYTHONUNBUFFERED=1
-    command: python wav2lip_cli.py --imagen input/imagen.jpg --texto "Tu texto aquí"
+    command: python wav2lip_cli.py --imagen input/imagen.jpg --texto "Tu texto aquÃ­"

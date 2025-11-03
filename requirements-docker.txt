@@ -1,0 +1,14 @@
+# WAV2LIP Dependencies for Docker
+opencv-python-headless==4.12.0.88
+mediapipe==0.10.21
+torch==2.9.0+cpu
+torchvision==0.24.0+cpu
+torchaudio==2.9.0+cpu
+pyttsx3==2.99
+pillow==12.0.0
+numpy==1.26.4
+scipy==1.16.3
+matplotlib==3.10.7
+tqdm==4.67.1
+ffmpeg-python==0.2.0
+argparse
