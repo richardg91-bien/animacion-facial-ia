@@ -152,6 +152,27 @@ engine.runAndWait()
 - ✅ AVI
 - ✅ MOV
 
+## ⚠️ Limitaciones Importantes
+
+### Dependencias y Compatibilidad
+Incluso si encontráramos el repositorio perfecto en GitHub para la animación de labios, nos enfrentaríamos al mismo problema: **no podríamos instalar las dependencias necesarias** (como OpenCV, PyTorch, ffmpeg, etc.) para que funcione.
+
+Esta es la razón por la que este proyecto incluye:
+- **Múltiples implementaciones** con diferentes niveles de dependencias
+- **Versión ultra-simple** que solo usa PIL y pyttsx3
+- **Fallbacks** para cuando las librerías complejas fallan
+- **Entornos virtuales** pre-configurados para diferentes casos
+
+### Por Qué Existen Estas Limitaciones
+- 🔴 **OpenCV**: Problemas de compilación en algunos sistemas
+- 🔴 **PyTorch**: Requiere versiones específicas de Python/CUDA
+- 🔴 **MediaPipe**: No siempre compatible con todas las versiones
+- 🔴 **FFmpeg**: Instalación externa requerida
+- 🔴 **numba**: Conflictos con Python 3.14+
+
+### Nuestra Solución
+Este proyecto está diseñado para **funcionar a pesar de estas limitaciones**, ofreciendo alternativas que van desde básicas hasta avanzadas según lo que esté disponible en tu sistema.
+
 ## 🔧 Solución de Problemas
 
 ### Error: "No se detectó cara"
